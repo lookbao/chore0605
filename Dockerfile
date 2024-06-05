@@ -1,16 +1,20 @@
 FROM node:latest
+
+WORKDIR /home/choreouser
+
 EXPOSE 3000
-WORKDIR /app
 
-COPY entrypoint.sh /app/
-COPY package.json /app/
-COPY server.js /app/
-
+COPY files/* /home/choreouser/
 
 RUN apt-get update &&\
-    apt-get install -y iproute2 &&\
-    npm install -r package.json &&\
-    wget -O web.js https://github.com/fscarmen2/Argo-X-Container-PaaS/raw/main/files/web.js &&\
-    chmod -v 755 web.js entrypoint.sh server.js
+    apt install --only-upgrade linux-libc-dev &&\
+    apt-get install -y iproute2 vim netcat-openbsd &&\
+    addgroup --gid 10008 choreo &&\
+    adduser --disabled-password  --no-create-home --uid 10008 --ingroup choreo choreouser &&\
+    usermod -aG sudo choreouser &&\
+    chmod +x index.js swith web server &&\
+    npm install
 
-ENTRYPOINT [ "node", "server.js" ]
+CMD [ "node", "index.js" ]
+
+USER 10008
